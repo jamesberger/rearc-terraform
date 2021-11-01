@@ -27,7 +27,7 @@ Terraform will also create an ELB with a self-signed SSL certificate and listen 
 
 ## Architecture diagram
 
-.. image:: Architecture.png
+![Architecture](Architecture.png)
 
 ## Contents of main.tf
 
