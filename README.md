@@ -1,21 +1,33 @@
 # rearc-terraform
-A repository for Terraform code for the Rearc project
+A repository for Terraform code for the Rearc project and associated files for the Quest project
 
 This code allows Terraform to spin up the infrastructure we need to run the Rearc Quest app, which includes:
 
 - An EC2 instance built from an AMI
-
   - The AMI was built from an Amazon Linux instance with the following items configured:
     - Docker, Nodejs and Git installed with yum
     - A cloned copy of the Rearc Quest repository at https://github.com/rearc/quest
     - A Docker image containing the Rearc Quest app
     - A Systemd unit file that calls a script that starts this Docker image on boot
       - The script is just one line - `sudo docker run -p 80:3000 --env-file ./envs james/rearc-app`
+  - The security group for the instance has the following rules that allow access:
+    - An egress rule that allows all outbound traffic
+    - An ingress rule that allows SSH traffic from our home IP over port 22
+    - An ingress rule that allows HTTP traffic from anywhere over port 80
+
+- An ELB (Elastic Load Balancer) with the following properties:
+  - A listener that listens for requests on port 443 (HTTPS) that:
+    - Handles SSL encryption with a self-signed SSL cert and performs SSL offloading
+    - Sends traffic to port 80 on the EC2 instance where the app is listening
+  - A health check that verifies that the EC2 instance is responding on HTTP port 80 every 30 seconds
 
 
+When Terraform spins this EC2 instance up, the instance will accept traffic on port 22 for SSH access and port 80 for web based access to the app.
+Terraform will also create an ELB with a self-signed SSL certificate and listen on port 443 for HTTPS traffic and then pass it to the instance on port 80
 
-When Terraform spins this EC2 instance up, the instance will accept traffic on port 22 for SSH access and port 3000 for web based access to the app.
+## Architecture diagram
 
+.. image:: Architecture.png
 
 ## Contents of main.tf
 
@@ -25,8 +37,8 @@ In `main.tf`, we have the following items configured:
 
   - The region we're building the infrastructure in - `us-east-1` in this case
   - The location of our AWS credentials file
-  - The profile in the AWS credentials file to use
-    - This allows Terraform to build our infrastructure
+    - The profile in the AWS credentials file to use
+    - This allows Terraform to build our infrastructure when it uses these credentials to authenticate with AWS
 
 - The S3 bucket for our Terraform remote state file
 
@@ -42,7 +54,7 @@ In `main.tf`, we have the following items configured:
 
 - A security group `rearc_server_sg` with the following rules:
   - Allows access to the instance via SSH from our home IP
-  - Allows access to the instance app via the web on port 80 from our home IP
+  - Allows access to the instance app via the web on port 80 from anywhere
 
 - An ELB with the following properties:
 

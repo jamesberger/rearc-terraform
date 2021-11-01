@@ -4,6 +4,7 @@ provider "aws" {
   profile                 = "home"
 }
 
+# The location for our Terraform state file
 terraform {
   backend "s3" {
     bucket = "rearc-project-tfstate"
@@ -12,6 +13,7 @@ terraform {
   }
 }
 
+# The EC2 instance our app is running on
 resource "aws_instance" "rearc_server" {
   ami                    = "ami-0ea00bb70e6d7d222"
   instance_type          = "t2.micro"
@@ -55,11 +57,11 @@ resource "aws_security_group_rule" "rearc_ssh_instance_access" {
 resource "aws_security_group_rule" "rearc_app_instance_access" {
   type              = "ingress"
   protocol          = "TCP"
-  from_port         = 3000
-  to_port           = 3000
-  cidr_blocks       = ["47.186.42.182/32"]
+  from_port         = 80
+  to_port           = 80
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.rearc_server_sg.id
-  description       = "Allow app access from home"
+  description       = "Allows app access"
 }
 
 # Create a load balancer and also use it for SSL offloading with our self-signed cert
