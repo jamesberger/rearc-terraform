@@ -105,3 +105,21 @@ In `main.tf`, we have the following items configured:
   - `5_secret-word-check.png` - An image that shows the results of the secret word check page
   - `6_elb-check.png` - An image that shows the results of the ELB check page
   - `7_tls-check.png` - An image that shows the results of the TLS/SSL check page
+
+## Quest task images
+
+![First task](0_initial-app-hosted.png)
+
+![Second task](1_app-hosted-with-docker-and-env-file.png)
+
+![Third task](2_app-hosted-with-docker-and-env-file-and-working-elb.png)
+
+![Fourth task](3_app-hosted-with-docker-and-env-file-and-working-elb-and-working-ssl.png)
+
+![Docker check](4_docker-check.png)
+
+![Secret word check](5_secret-word-check.png)
+
+![ELB check](6_elb-check.png)
+
+![TLS check](7_tls-check.png)
