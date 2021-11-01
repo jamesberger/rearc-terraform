@@ -61,3 +61,35 @@ resource "aws_security_group_rule" "rearc_app_instance_access" {
   security_group_id = aws_security_group.rearc_server_sg.id
   description       = "Allow app access from home"
 }
+
+# Create a load balancer and also use it for SSL offloading with our self-signed cert
+resource "aws_elb" "rearc_elb" {
+  name               = "rearc-terraform-elb"
+  availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
+
+  listener {
+    instance_port      = 80
+    instance_protocol  = "http"
+    lb_port            = 443
+    lb_protocol        = "https"
+    ssl_certificate_id = "arn:aws:iam::095106921861:server-certificate/rearc-quest-cert"
+  }
+
+  health_check {
+    healthy_threshold   = 3
+    unhealthy_threshold = 10
+    timeout             = 3
+    target              = "HTTP:80/"
+    interval            = 30
+  }
+
+  instances                   = [aws_instance.rearc_server.id]
+  cross_zone_load_balancing   = true
+  idle_timeout                = 400
+  connection_draining         = true
+  connection_draining_timeout = 400
+
+  tags = {
+    Name = "rearc-terraform-elb"
+  }
+}
